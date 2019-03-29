@@ -1,7 +1,3 @@
-from hypothesis import given, strategies as st
-import random
-
-
 class DAG:
     def __init__(self, vertices, edges):
         self._graph = {}
@@ -28,6 +24,13 @@ class DAG:
 
     def get_vertices(self):
         return self._graph.keys()
+
+    def get_edges(self):
+        edges = []
+        for v in self._graph:
+            for u in self._graph[v]:
+                edges.append((v, u))
+        return edges
 
     def topological_sort(self) -> list:
         """
@@ -80,36 +83,3 @@ class DAG:
             if not visited[v]:
                 if dfs(v):
                     raise Exception("Graph contains cycle")
-
-
-max_vert = random.randint(0, 10)
-# max_vert = st.integers(min_value=0, max_value=10)
-
-
-@given(  # vertices=max_vert,
-       edges=st.tuples(st.integers(min_value=0, max_value=max_vert),
-                       st.integers(min_value=0, max_value=max_vert)))
-def test_topological_sort(edges):
-    dag = DAG(list(range(max_vert)), edges)
-    assert check_topological_sort(dag, dag.topological_sort())
-
-
-def check_topological_sort(dag, sorted_list):
-    sorted_list.reverse()
-    size = len(sorted_list)
-
-    def dfs(v):
-        res = set()
-        for u in dag._graph[v]:
-            res.add(u).add(dfs(u))
-        return res
-
-    for i in range(size):
-        adjacent = dfs(sorted_list[i])
-        for j in range(i + 1, size):
-            if sorted_list[j] in adjacent:
-                return False
-    return True
-
-
-test_topological_sort()
